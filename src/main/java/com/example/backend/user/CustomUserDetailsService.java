@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.example.backend.exception.UserAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,14 +23,18 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s not found", username)));
+                             .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s not found", username)));
     }
 
-    public void registerUser(UserDto userDto) {
+    public void registerUser(UserForm userForm) {
+        if (userRepository.findByUsername(userForm.getUsername()).isPresent() ||
+                userRepository.findByEmail(userForm.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException("User already exists");
+        }
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
-        ApplicationUser user = new ApplicationUser(userDto.getUsername(), encodedPassword, userDto.getEmail(),
+        String encodedPassword = passwordEncoder.encode(userForm.getPassword());
+        ApplicationUser user = new ApplicationUser(userForm.getUsername(), encodedPassword, userForm.getEmail(),
                 true, true, true, true, authorities);
         userRepository.save(user);
     }

@@ -1,8 +1,18 @@
 package com.example.backend.user;
 
-public class UserDto {
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+public class UserForm {
+    @NotNull
+    @Size(min = 2, max = 30)
     private String username;
+    @NotNull
+    @Email
     private String email;
+    @NotNull
+    @Size(min = 8, max = 256)
     private String password;
 
     public String getUsername() {
