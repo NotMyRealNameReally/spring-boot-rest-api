@@ -4,7 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.example.backend.exception.UserAlreadyExistsException;
+import com.example.backend.exception.user.InvalidRegistrationTokenException;
+import com.example.backend.exception.user.UserAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private RegistrationTokenRepository registrationTokenRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -27,6 +30,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public void registerUser(UserForm userForm) {
+        if (registrationTokenRepository.findByValue(userForm.getToken()).isEmpty()) {
+            throw new InvalidRegistrationTokenException("Invalid token");
+        }
         if (userRepository.findByUsername(userForm.getUsername()).isPresent() ||
                 userRepository.findByEmail(userForm.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("User already exists");
@@ -37,6 +43,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         ApplicationUser user = new ApplicationUser(userForm.getUsername(), encodedPassword, userForm.getEmail(),
                 true, true, true, true, authorities);
         userRepository.save(user);
+        registrationTokenRepository.removeByValue(userForm.getToken());
     }
 
     public List<ApplicationUser> findAllUsers() {

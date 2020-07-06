@@ -3,6 +3,8 @@ package com.example.backend.exception;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.backend.exception.user.InvalidRegistrationTokenException;
+import com.example.backend.exception.user.UserAlreadyExistsException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +38,16 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                                                              ServletWebRequest request) {
         ApiError apiError = new ApiError(HttpStatus.CONFLICT, request.getRequest().getRequestURI(),
                 "Could not register user", ex.getMessage());
+        return ResponseEntity
+                .status(apiError.getStatus())
+                .body(apiError);
+    }
+
+    @ExceptionHandler(InvalidRegistrationTokenException.class)
+    protected ResponseEntity<Object> handleInvalidRegistrationToken(InvalidRegistrationTokenException ex,
+                                                                    ServletWebRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, request.getRequest().getRequestURI(),
+                "Could not register user.", ex.getMessage());
         return ResponseEntity
                 .status(apiError.getStatus())
                 .body(apiError);

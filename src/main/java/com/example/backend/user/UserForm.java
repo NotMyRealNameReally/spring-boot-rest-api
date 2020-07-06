@@ -14,6 +14,8 @@ public class UserForm {
     @NotNull
     @Size(min = 8, max = 256)
     private String password;
+    @NotNull
+    private String token;
 
     public String getUsername() {
         return username;
@@ -25,5 +27,9 @@ public class UserForm {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getToken() {
+        return token;
     }
 }
