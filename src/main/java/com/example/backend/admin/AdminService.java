@@ -2,13 +2,15 @@ package com.example.backend.admin;
 
 import com.example.backend.user.RegistrationToken;
 import com.example.backend.user.RegistrationTokenRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AdminService {
-    @Autowired
-    RegistrationTokenRepository registrationTokenRepository;
+    private final RegistrationTokenRepository registrationTokenRepository;
+
+    public AdminService(RegistrationTokenRepository registrationTokenRepository) {
+        this.registrationTokenRepository = registrationTokenRepository;
+    }
 
     public String generateRegistrationToken() {
         RegistrationToken token = new RegistrationToken();

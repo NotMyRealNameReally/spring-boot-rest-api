@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.example.backend.exception.user.InvalidRegistrationTokenException;
 import com.example.backend.exception.user.UserAlreadyExistsException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,12 +15,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private RegistrationTokenRepository registrationTokenRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final RegistrationTokenRepository registrationTokenRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public CustomUserDetailsService(UserRepository userRepository, RegistrationTokenRepository registrationTokenRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.registrationTokenRepository = registrationTokenRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
