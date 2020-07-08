@@ -17,6 +17,13 @@ public class UserForm {
     @NotNull
     private String token;
 
+    public UserForm(String username, String email, String password, String token) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.token = token;
+    }
+
     public String getUsername() {
         return username;
     }
