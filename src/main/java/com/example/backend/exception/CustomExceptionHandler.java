@@ -3,6 +3,9 @@ package com.example.backend.exception;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.ConstraintViolationException;
+
+import com.example.backend.exception.user.InvalidPasswordException;
 import com.example.backend.exception.user.InvalidRegistrationTokenException;
 import com.example.backend.exception.user.UserAlreadyExistsException;
 import org.springframework.http.HttpHeaders;
@@ -23,14 +26,30 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers, HttpStatus status,
                                                                   WebRequest request) {
         List<String> errors = new ArrayList<>();
-        ex.getBindingResult().getFieldErrors().forEach(fieldError ->
-                errors.add(fieldError.getField() + ": " + fieldError.getDefaultMessage()));
-        ex.getBindingResult().getGlobalErrors().forEach(objectError ->
-                errors.add(objectError.getObjectName() + ": " + objectError.getDefaultMessage()));
+        ex.getBindingResult()
+          .getFieldErrors()
+          .forEach(fieldError -> errors.add(fieldError.getField() + ": " + fieldError.getDefaultMessage()));
+        ex.getBindingResult()
+          .getGlobalErrors()
+          .forEach(objectError -> errors.add(objectError.getObjectName() + ": " + objectError.getDefaultMessage()));
 
         ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST,
                 ((ServletWebRequest) request).getRequest().getRequestURI(), "Invalid parameters", errors);
         return handleExceptionInternal(ex, apiError, headers, apiError.getStatus(), request);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    protected ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex,
+                                                               ServletWebRequest request) {
+        List<String> errors = new ArrayList<>();
+        ex.getConstraintViolations()
+          .forEach(violation -> errors.add(violation.getMessage()));
+
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, request.getRequest().getRequestURI(),
+                "Invalid parameters", errors);
+        return ResponseEntity
+                .status(apiError.getStatus())
+                .body(apiError);
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
@@ -48,6 +67,14 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                                                                     ServletWebRequest request) {
         ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, request.getRequest().getRequestURI(),
                 "Could not register user.", ex.getMessage());
+        return ResponseEntity
+                .status(apiError.getStatus())
+                .body(apiError);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    protected ResponseEntity<Object> handleInvalidPassword(InvalidPasswordException ex, ServletWebRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, request.getRequest().getRequestURI(), ex.getMessage());
         return ResponseEntity
                 .status(apiError.getStatus())
                 .body(apiError);
