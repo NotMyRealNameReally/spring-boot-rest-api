@@ -1,7 +1,7 @@
 package com.example.backend.admin;
 
-import com.example.backend.user.RegistrationToken;
-import com.example.backend.user.RegistrationTokenRepository;
+import com.example.backend.user.registrationtoken.RegistrationToken;
+import com.example.backend.user.registrationtoken.RegistrationTokenRepository;
 import org.springframework.stereotype.Service;
 
 @Service

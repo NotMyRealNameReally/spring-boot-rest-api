@@ -7,6 +7,8 @@ import com.example.backend.exception.user.InvalidPasswordException;
 import com.example.backend.exception.user.InvalidRegistrationTokenException;
 import com.example.backend.exception.user.UserAlreadyExistsException;
 import com.example.backend.user.form.UserRegistrationForm;
+import com.example.backend.user.registrationtoken.RegistrationToken;
+import com.example.backend.user.registrationtoken.RegistrationTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

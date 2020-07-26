@@ -8,6 +8,7 @@ import com.example.backend.exception.user.InvalidPasswordException;
 import com.example.backend.exception.user.InvalidRegistrationTokenException;
 import com.example.backend.exception.user.UserAlreadyExistsException;
 import com.example.backend.user.form.UserRegistrationForm;
+import com.example.backend.user.registrationtoken.RegistrationTokenRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
