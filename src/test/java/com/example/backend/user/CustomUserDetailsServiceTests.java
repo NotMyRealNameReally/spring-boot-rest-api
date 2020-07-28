@@ -45,7 +45,8 @@ public class CustomUserDetailsServiceTests {
 
     @Test
     void should_Register_User() {
-        UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com", "password", "token");
+        UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com",
+                "password", "token");
         given(registrationTokenRepository.findByValue(form.getToken()))
                 .willReturn(Optional.of(new RegistrationToken()));
         given(userRepository.findByUsername(form.getUsername()))
@@ -68,7 +69,8 @@ public class CustomUserDetailsServiceTests {
 
     @Test
     void should_Not_Register_User_And_Throw_InvalidRegistrationTokenException_When_Token_Invalid() {
-        UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com", "password", "token");
+        UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com",
+                "password", "token");
         ApplicationUser user = new ApplicationUser("user", "password", "user@test.com",
                 Collections.emptyList());
         given(registrationTokenRepository.findByValue(form.getToken()))
@@ -79,14 +81,15 @@ public class CustomUserDetailsServiceTests {
                 .willReturn(Optional.of(user));
 
         assertThatThrownBy(() -> underTest.registerUser(form))
-                  .isInstanceOf(InvalidRegistrationTokenException.class);
+                .isInstanceOf(InvalidRegistrationTokenException.class);
 
         then(userRepository).shouldHaveNoInteractions();
     }
 
     @Test
     void should_Not_Register_User_And_Throw_UserAlreadyExistsException_When_Username_Taken() {
-        UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com", "password", "token");
+        UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com",
+                "password", "token");
         ApplicationUser user = new ApplicationUser("user", "password", "user@test.com",
                 Collections.emptyList());
         given(registrationTokenRepository.findByValue(form.getToken()))
@@ -97,14 +100,15 @@ public class CustomUserDetailsServiceTests {
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> underTest.registerUser(form))
-                  .isInstanceOf(UserAlreadyExistsException.class);
+                .isInstanceOf(UserAlreadyExistsException.class);
 
         then(userRepository).should(never()).save(any(ApplicationUser.class));
     }
 
     @Test
     void should_Not_Register_User_And_Throw_UserAlreadyExistsException_When_Email_Taken() {
-        UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com", "password", "token");
+        UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com",
+                "password", "token");
         ApplicationUser user = new ApplicationUser("user", "password", "user@test.com",
                 Collections.emptyList());
         given(registrationTokenRepository.findByValue(form.getToken()))
@@ -150,6 +154,7 @@ public class CustomUserDetailsServiceTests {
 
         assertThatThrownBy(() -> underTest.changeUserPassword(username, oldPassword, newPassword))
                 .isInstanceOf(InvalidPasswordException.class);
+
         then(userRepository).should(never()).save(any(ApplicationUser.class));
     }
 
@@ -164,6 +169,7 @@ public class CustomUserDetailsServiceTests {
 
         assertThatThrownBy(() -> underTest.changeUserPassword(username, oldPassword, newPassword))
                 .isInstanceOf(UsernameNotFoundException.class);
+
         then(userRepository).should(never()).save(any(ApplicationUser.class));
     }
 }
