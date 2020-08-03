@@ -22,7 +22,7 @@ public class EnumValidator implements ConstraintValidator<Enum, String> {
                                 enumValue.toString().equalsIgnoreCase(value));
         if (!valid) {
             context.disableDefaultConstraintViolation();
-            String errorMessage = "Can only be: " +
+            String errorMessage = "Can only be one of: " +
                     Arrays.stream(this.constraintAnnotation.enumClass().getEnumConstants())
                             .map(String::valueOf)
                             .collect(Collectors.joining(", "));
