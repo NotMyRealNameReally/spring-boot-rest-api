@@ -1,10 +1,5 @@
 package com.example.backend.exception;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.validation.ConstraintViolationException;
-
 import com.example.backend.exception.user.InvalidPasswordException;
 import com.example.backend.exception.user.InvalidRegistrationTokenException;
 import com.example.backend.exception.user.UserAlreadyExistsException;
@@ -17,6 +12,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import javax.validation.ConstraintViolationException;
+import java.util.ArrayList;
+import java.util.List;
 
 @ControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
@@ -43,7 +42,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                                                                ServletWebRequest request) {
         List<String> errors = new ArrayList<>();
         ex.getConstraintViolations()
-          .forEach(violation -> errors.add(violation.getMessage()));
+          .forEach(violation -> errors.add(violation.getPropertyPath() + ": " + violation.getMessage()));
 
         ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, request.getRequest().getRequestURI(),
                 "Invalid parameters", errors);
