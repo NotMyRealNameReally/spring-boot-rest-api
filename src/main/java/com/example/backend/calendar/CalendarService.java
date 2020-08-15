@@ -1,11 +1,5 @@
 package com.example.backend.calendar;
 
-import com.example.backend.user.ApplicationUser;
-import com.example.backend.user.UserRepository;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import com.example.backend.user.ApplicationUser;
+import com.example.backend.user.UserRepository;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 @Service
 public class CalendarService {
@@ -61,12 +61,12 @@ public class CalendarService {
         });
     }
 
-    @Scheduled(cron = "@daily")
+    @Scheduled(cron = "0 0 12 * * *")
     private void removePastDates(){
         calendarRepository.deleteByDateBefore(LocalDate.now());
     }
 
-    private DayDto convertToDayDto(Day day) {
+    DayDto convertToDayDto(Day day) {
         Map<String, Availability> availabilityByUserId = day.getAvailabilityByUserId();
         Map<String, Availability> availabilityByUsername = new HashMap<>();
 
