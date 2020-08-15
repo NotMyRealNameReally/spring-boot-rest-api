@@ -6,12 +6,12 @@ import java.util.Map;
 
 public class DayDto {
     private LocalDate date;
-    private Map<String, Availability> userAvailability; // Username as key
+    private Map<String, Availability> availabilityByUsername;
     private List<String> eventsById;
 
-    public DayDto(LocalDate date, Map<String, Availability> userAvailability, List<String> eventsById) {
+    public DayDto(LocalDate date, Map<String, Availability> availabilityByUsername, List<String> eventsById) {
         this.date = date;
-        this.userAvailability = userAvailability;
+        this.availabilityByUsername = availabilityByUsername;
         this.eventsById = eventsById;
     }
 
@@ -23,12 +23,12 @@ public class DayDto {
         this.date = date;
     }
 
-    public Map<String, Availability> getUserAvailability() {
-        return userAvailability;
+    public Map<String, Availability> getAvailabilityByUsername() {
+        return availabilityByUsername;
     }
 
-    public void setUserAvailability(Map<String, Availability> userAvailability) {
-        this.userAvailability = userAvailability;
+    public void setAvailabilityByUsername(Map<String, Availability> availabilityByUsername) {
+        this.availabilityByUsername = availabilityByUsername;
     }
 
     public List<String> getEventsById() {

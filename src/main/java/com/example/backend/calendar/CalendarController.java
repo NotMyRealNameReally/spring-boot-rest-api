@@ -1,7 +1,8 @@
 package com.example.backend.calendar;
 
-import org.springframework.data.domain.Pageable;
+import com.example.backend.util.Date;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/calendar")
+@Validated
 public class CalendarController {
     private final CalendarService calendarService;
 
@@ -17,8 +19,9 @@ public class CalendarController {
     }
 
     @GetMapping
-    public List<Day> getCalendar(Pageable pageable){
-        return calendarService.getCalendar();
+    public List<DayDto> getCalendar(@RequestParam @Date(pattern = "yyyy-MM-dd", notPast = true) String start,
+                                 @RequestParam @Date(pattern = "yyyy-MM-dd", notPast = true) String end){
+        return calendarService.getCalendar(start, end);
     }
 
     @PutMapping
