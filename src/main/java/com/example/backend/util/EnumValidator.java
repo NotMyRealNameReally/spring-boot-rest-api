@@ -1,9 +1,11 @@
 package com.example.backend.util;
 
+import java.util.Arrays;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class EnumValidator implements ConstraintValidator<Enum, String> {
     private Enum constraintAnnotation;
@@ -15,20 +17,31 @@ public class EnumValidator implements ConstraintValidator<Enum, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (value == null) return true;
+        if (value == null)
+            return true;
+
+        Predicate<java.lang.Enum<?>> predicate;
+        if (constraintAnnotation.ignoreCase()) {
+            predicate = enumValue -> enumValue.toString().equalsIgnoreCase(value);
+        } else {
+            predicate = enumValue -> enumValue.toString().equals(value);
+        }
         boolean valid = Arrays.stream(this.constraintAnnotation.enumClass().getEnumConstants())
-                .anyMatch(enumValue -> enumValue.toString().equals(value) ||
-                        this.constraintAnnotation.ignoreCase() &&
-                                enumValue.toString().equalsIgnoreCase(value));
+                              .anyMatch(predicate);
         if (!valid) {
-            context.disableDefaultConstraintViolation();
-            String errorMessage = "Can only be one of: " +
-                    Arrays.stream(this.constraintAnnotation.enumClass().getEnumConstants())
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", "));
-            context.buildConstraintViolationWithTemplate(errorMessage)
-                    .addConstraintViolation();
+            setCustomConstraintViolation(context);
         }
         return valid;
+    }
+
+    private void setCustomConstraintViolation(ConstraintValidatorContext context) {
+        context.disableDefaultConstraintViolation();
+        String errorMessage = "Can only be one of: " +
+                Arrays.stream(this.constraintAnnotation.enumClass().getEnumConstants())
+                      .map(String::valueOf)
+                      .collect(Collectors.joining(", "));
+        errorMessage += constraintAnnotation.ignoreCase() ? ". Case insensitive" : ". Case sensitive";
+        context.buildConstraintViolationWithTemplate(errorMessage)
+               .addConstraintViolation();
     }
 }
