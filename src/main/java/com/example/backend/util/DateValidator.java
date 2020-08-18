@@ -1,10 +1,11 @@
 package com.example.backend.util;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 public class DateValidator implements ConstraintValidator<Date, String> {
     private Date constraintAnnotation;
@@ -22,7 +23,7 @@ public class DateValidator implements ConstraintValidator<Date, String> {
             return false;
         }
         if (constraintAnnotation.notPast() && validated.isBefore(LocalDate.now())) {
-            setCustomConstraintViolation("Cannot be in the past", context);
+            setCustomConstraintViolation("Cannot be in the past.", context);
             return false;
         }
         return true;
