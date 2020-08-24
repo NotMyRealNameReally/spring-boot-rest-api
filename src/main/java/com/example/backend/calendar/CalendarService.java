@@ -29,13 +29,13 @@ public class CalendarService {
         LocalDate endDate = LocalDate.parse(end);
 
         return startDate.datesUntil(endDate.plusDays(1))
-                .map(date -> {
-                    Day day = calendarRepository
-                            .findByDate(date)
-                            .orElseGet(() -> generateEmptyDay(date));
-                    return convertToDayDto(day);
-                })
-                .collect(Collectors.toList());
+                        .map(date -> {
+                            Day day = calendarRepository
+                                    .findByDate(date)
+                                    .orElseGet(() -> generateEmptyDay(date));
+                            return convertToDayDto(day);
+                        })
+                        .collect(Collectors.toList());
     }
 
     public void setUserAvailability(String username, AvailabilityChangeForm form) {
@@ -62,11 +62,11 @@ public class CalendarService {
     }
 
     @Scheduled(cron = "0 0 12 * * *")
-    private void removePastDates(){
+    private void removePastDates() {
         calendarRepository.deleteByDateBefore(LocalDate.now());
     }
 
-    DayDto convertToDayDto(Day day) {
+    private DayDto convertToDayDto(Day day) {
         Map<String, Availability> availabilityByUserId = day.getAvailabilityByUserId();
         Map<String, Availability> availabilityByUsername = new HashMap<>();
 

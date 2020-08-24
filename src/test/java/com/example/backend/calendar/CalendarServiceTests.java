@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -40,20 +39,32 @@ public class CalendarServiceTests {
     }
 
     @Test
-    void should_Convert_To_DayDto() {
+    void should_Get_Calendar() {
         ApplicationUser user1 = generateUser("user1", "1");
         ApplicationUser user2 = generateUser("user2", "2");
-        LocalDate date = LocalDate.parse("2020-08-15");
-        Day day = generateEmptyDay(date);
-        day.getAvailabilityByUserId().put(user1.getId(), Availability.AVAILABLE);
+        String startDate = "2020-08-15";
+        String endDate = "2020-08-16";
+        Day day1 = generateEmptyDay(LocalDate.parse(startDate));
+        day1.getAvailabilityByUserId().put(user1.getId(), Availability.AVAILABLE);
         given(userRepository.findAll()).willReturn(List.of(user1, user2));
+        given(calendarRepository.findByDate(LocalDate.parse(startDate))).willReturn(Optional.of(day1));
+        given(calendarRepository.findByDate(LocalDate.parse(endDate))).willReturn(Optional.empty());
 
-        DayDto dayDto = underTest.convertToDayDto(day);
+        List<DayDto> calendar = underTest.getCalendar(startDate, endDate);
 
-        assertThat(dayDto.getAvailabilityByUsername()).containsEntry(user1.getUsername(), Availability.AVAILABLE);
-        assertThat(dayDto.getAvailabilityByUsername()).containsEntry(user2.getUsername(), Availability.UNKNOWN);
-        assertThat(dayDto.getEventsById()).containsExactlyElementsOf(day.getEventsById());
-        assertThat(dayDto.getDate()).isEqualTo(day.getDate());
+        assertThat(calendar.size()).isEqualTo(2);
+        assertThat(calendar).anySatisfy(dayDto -> {
+            assertThat(dayDto.getAvailabilityByUsername()).containsEntry(user1.getUsername(), Availability.AVAILABLE);
+            assertThat(dayDto.getAvailabilityByUsername()).containsEntry(user2.getUsername(), Availability.UNKNOWN);
+            assertThat(dayDto.getEventsById()).containsExactlyElementsOf(day1.getEventsById());
+            assertThat(dayDto.getDate()).isEqualTo(day1.getDate());
+        });
+        assertThat(calendar).anySatisfy(dayDto -> {
+            assertThat(dayDto.getAvailabilityByUsername()).containsEntry(user1.getUsername(), Availability.UNKNOWN);
+            assertThat(dayDto.getAvailabilityByUsername()).containsEntry(user2.getUsername(), Availability.UNKNOWN);
+            assertThat(dayDto.getEventsById()).isEmpty();
+            assertThat(dayDto.getDate()).isEqualTo(LocalDate.parse(endDate));
+        });
     }
 
     @Test
@@ -89,16 +100,14 @@ public class CalendarServiceTests {
     @Test
     void should_Save_User_Entries() {
         ApplicationUser user = generateUser("user", "1");
-        AvailabilityChangeForm form = new AvailabilityChangeForm("2020-08-15", "2020-08-20",
+        AvailabilityChangeForm form = new AvailabilityChangeForm("2020-08-15", "2020-08-16",
                 Availability.AVAILABLE.toString());
         given(userRepository.findByUsername(user.getUsername())).willReturn(Optional.of(user));
         given(calendarRepository.findByDate(LocalDate.parse(form.getStartDate()))).willReturn(Optional.empty());
 
         underTest.setUserAvailability(user.getUsername(), form);
 
-        int numOfDays = (int) LocalDate.parse(form.getStartDate())
-                                       .until(LocalDate.parse(form.getEndDate().get()).plusDays(1), DAYS);
-        then(calendarRepository).should(times(numOfDays)).save(dayCaptor.capture());
+        then(calendarRepository).should(times(2)).save(dayCaptor.capture());
         Day updatedDay = dayCaptor.getValue();
         assertThat(updatedDay.getAvailabilityByUserId()).containsEntry(user.getId(), Availability.AVAILABLE);
     }
