@@ -10,29 +10,21 @@ import com.example.backend.exception.user.UserAlreadyExistsException;
 import com.example.backend.user.form.UserRegistrationForm;
 import com.example.backend.user.registrationtoken.RegistrationTokenRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
-    private final UserRepository userRepository;
-    private final RegistrationTokenRepository registrationTokenRepository;
-    private final PasswordEncoder passwordEncoder;
+public class UserService {
+    private PasswordEncoder passwordEncoder;
+    private UserRepository userRepository;
+    private RegistrationTokenRepository registrationTokenRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository, RegistrationTokenRepository registrationTokenRepository, PasswordEncoder passwordEncoder) {
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository,
+                       RegistrationTokenRepository registrationTokenRepository) {
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.registrationTokenRepository = registrationTokenRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository
-                .findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s not found", username)));
     }
 
     public void registerUser(UserRegistrationForm userForm) {

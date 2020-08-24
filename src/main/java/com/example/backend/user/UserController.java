@@ -18,24 +18,24 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping("api/user")
 public class UserController {
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserService userService;
 
-    public UserController(CustomUserDetailsService customUserDetailsService) {
-        this.customUserDetailsService = customUserDetailsService;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping
     public List<ApplicationUser> findAllUsers() {
-        return customUserDetailsService.findAllUsers();
+        return userService.findAllUsers();
     }
 
     @PostMapping("/register")
     public void registerUser(@RequestBody @Valid UserRegistrationForm user) {
-        customUserDetailsService.registerUser(user);
+        userService.registerUser(user);
     }
 
     @PostMapping("/change-password")
     public void changeUserPassword(Authentication authentication, @RequestBody @Valid PasswordChangeForm form) {
-        customUserDetailsService.changeUserPassword(authentication.getName(), form.getOldPassword(), form.getNewPassword());
+        userService.changeUserPassword(authentication.getName(), form.getOldPassword(), form.getNewPassword());
     }
 }

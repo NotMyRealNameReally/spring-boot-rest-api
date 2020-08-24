@@ -15,7 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,7 +26,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
-public class CustomUserDetailsServiceTests {
+public class UserServiceTests {
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -36,12 +35,12 @@ public class CustomUserDetailsServiceTests {
     private PasswordEncoder passwordEncoder;
     @Captor
     private ArgumentCaptor<ApplicationUser> userCaptor;
-    private CustomUserDetailsService underTest;
+    private UserService underTest;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest = new CustomUserDetailsService(userRepository, registrationTokenRepository, passwordEncoder);
+        underTest = new UserService(passwordEncoder, userRepository, registrationTokenRepository);
     }
 
     @Test
@@ -164,8 +163,6 @@ public class CustomUserDetailsServiceTests {
         String oldPassword = "oldPassword";
         String newPassword = "newPassword";
         String username = "user";
-        ApplicationUser user = new ApplicationUser(username, "oldEncodedPassword", "user@test.com",
-                Collections.emptyList());
         given(userRepository.findByUsername(username)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> underTest.changeUserPassword(username, oldPassword, newPassword))
