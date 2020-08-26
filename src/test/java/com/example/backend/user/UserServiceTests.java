@@ -72,7 +72,7 @@ public class UserServiceTests {
         UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com",
                 "password", "token");
         ApplicationUser user = new ApplicationUser("user", "password", "user@test.com",
-                Collections.emptyList());
+                Collections.emptyList(), true);
         given(registrationTokenRepository.findByValue(form.getToken()))
                 .willReturn(Optional.empty());
         given(userRepository.findByUsername(form.getUsername()))
@@ -91,7 +91,7 @@ public class UserServiceTests {
         UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com",
                 "password", "token");
         ApplicationUser user = new ApplicationUser("user", "password", "user@test.com",
-                Collections.emptyList());
+                Collections.emptyList(), true);
         given(registrationTokenRepository.findByValue(form.getToken()))
                 .willReturn(Optional.of(new RegistrationToken()));
         given(userRepository.findByUsername(form.getUsername()))
@@ -110,7 +110,7 @@ public class UserServiceTests {
         UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com",
                 "password", "token");
         ApplicationUser user = new ApplicationUser("user", "password", "user@test.com",
-                Collections.emptyList());
+                Collections.emptyList(), true);
         given(registrationTokenRepository.findByValue(form.getToken()))
                 .willReturn(Optional.of(new RegistrationToken()));
         given(userRepository.findByUsername(form.getUsername()))
@@ -130,7 +130,7 @@ public class UserServiceTests {
         String newPassword = "newPassword";
         String username = "user";
         ApplicationUser user = new ApplicationUser(username, "oldEncodedPassword", "user@test.com",
-                Collections.emptyList());
+                Collections.emptyList(), true);
         given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
         given(passwordEncoder.matches(oldPassword, user.getPassword())).willReturn(true);
         given(passwordEncoder.encode(newPassword)).willReturn("newEncodedPassword");
@@ -148,7 +148,7 @@ public class UserServiceTests {
         String newPassword = "newPassword";
         String username = "user";
         ApplicationUser user = new ApplicationUser(username, "oldEncodedPassword", "user@test.com",
-                Collections.emptyList());
+                Collections.emptyList(), true);
         given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
         given(passwordEncoder.matches(oldPassword, user.getPassword())).willReturn(false);
 

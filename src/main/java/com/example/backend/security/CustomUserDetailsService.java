@@ -1,6 +1,8 @@
 package com.example.backend.security;
 
+import com.example.backend.user.ApplicationUser;
 import com.example.backend.user.UserRepository;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,8 +18,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository
+        ApplicationUser user = userRepository
                 .findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s not found", username)));
+        return new User(user.getUsername(), user.getPassword(), user.isEnabled(),
+                true, true, true, user.getAuthorities());
     }
 }

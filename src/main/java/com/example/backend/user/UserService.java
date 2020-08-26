@@ -16,9 +16,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    private PasswordEncoder passwordEncoder;
-    private UserRepository userRepository;
-    private RegistrationTokenRepository registrationTokenRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final RegistrationTokenRepository registrationTokenRepository;
 
     public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository,
                        RegistrationTokenRepository registrationTokenRepository) {
@@ -27,37 +27,43 @@ public class UserService {
         this.registrationTokenRepository = registrationTokenRepository;
     }
 
-    public void registerUser(UserRegistrationForm userForm) {
-        if (registrationTokenRepository.findByValue(userForm.getToken()).isEmpty()) {
-            throw new InvalidRegistrationTokenException("Invalid token");
-        }
-        if (userRepository.findByUsername(userForm.getUsername()).isPresent() ||
-                userRepository.findByEmail(userForm.getEmail()).isPresent()) {
+    public ApplicationUser registerUser(UserRegistrationForm userForm) {
+        registrationTokenRepository
+                .findByValue(userForm.getToken())
+                .orElseThrow(() -> new InvalidRegistrationTokenException("Invalid token"));
+        if (userExists(userForm.getUsername(), userForm.getEmail())) {
             throw new UserAlreadyExistsException("User already exists");
         }
-        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        String encodedPassword = passwordEncoder.encode(userForm.getPassword());
-        ApplicationUser user = new ApplicationUser(userForm.getUsername(), encodedPassword, userForm.getEmail(),
-                true, true, true, true, authorities);
-        userRepository.save(user);
         registrationTokenRepository.removeByValue(userForm.getToken());
+        return userRepository.save(createUserFromForm(userForm));
     }
 
     public void changeUserPassword(String username, String oldPassword, String newPassword) {
         ApplicationUser user = userRepository
                 .findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s not found", username)));
-
-        if (passwordEncoder.matches(oldPassword, user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(user);
-        } else {
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new InvalidPasswordException("Invalid password");
         }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     public List<ApplicationUser> findAllUsers() {
         return userRepository.findAll();
+    }
+
+    private ApplicationUser createUserFromForm(UserRegistrationForm form) {
+        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        String encodedPassword = passwordEncoder.encode(form.getPassword());
+
+        return new ApplicationUser(form.getUsername(), encodedPassword, form.getEmail(), authorities, false
+        );
+    }
+
+    private boolean userExists(String username, String email) {
+        return userRepository.findByUsername(username).isPresent() ||
+                userRepository.findByEmail(email).isPresent();
     }
 }

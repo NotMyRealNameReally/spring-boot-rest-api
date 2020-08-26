@@ -118,7 +118,7 @@ public class CalendarServiceTests {
 
     private ApplicationUser generateUser(String username, String id) {
         ApplicationUser user = new ApplicationUser(username, "password", "abc@gmail.com",
-                Collections.emptyList());
+                Collections.emptyList(), true);
         user.setId(id);
         return user;
     }
