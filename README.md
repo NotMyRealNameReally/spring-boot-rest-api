@@ -24,3 +24,4 @@ Backend api serving JSON for a website with functionality similar to a group on 
 - Spring Data MongoDB
 - JUnit 5 and AssertJ
 - Mockito
+- MongoDB
