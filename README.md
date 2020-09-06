@@ -15,6 +15,7 @@ Backend api serving JSON for a website with functionality similar to a group on 
 - Polls
 - Categorization of posts(discussion, info, event, poll)
 - Refactor test code to reduce duplication
+- Provide an admin account in a secure way
 ## Technologies/Libraries used
 - Java 14
 - Spring Boot 2.3
