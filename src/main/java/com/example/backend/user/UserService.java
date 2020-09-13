@@ -4,15 +4,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.example.backend.exception.user.InvalidPasswordException;
-import com.example.backend.exception.user.InvalidRegistrationTokenException;
-import com.example.backend.exception.user.UserAlreadyExistsException;
+import com.example.backend.exception.AppException;
 import com.example.backend.user.form.UserRegistrationForm;
 import com.example.backend.user.registrationtoken.RegistrationTokenRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import static com.example.backend.exception.ExceptionType.INVALID_PASSWORD;
+import static com.example.backend.exception.ExceptionType.INVALID_REGISTRATION_TOKEN;
+import static com.example.backend.exception.ExceptionType.USER_ALREADY_EXISTS;
 
 @Service
 public class UserService {
@@ -30,9 +32,9 @@ public class UserService {
     public ApplicationUser registerUser(UserRegistrationForm userForm) {
         registrationTokenRepository
                 .findByValue(userForm.getToken())
-                .orElseThrow(() -> new InvalidRegistrationTokenException("Invalid token"));
+                .orElseThrow(() -> new AppException("Invalid token", INVALID_REGISTRATION_TOKEN));
         if (userExists(userForm.getUsername(), userForm.getEmail())) {
-            throw new UserAlreadyExistsException("User already exists");
+            throw new AppException("User already exists", USER_ALREADY_EXISTS);
         }
         registrationTokenRepository.removeByValue(userForm.getToken());
         return userRepository.save(createUserFromForm(userForm));
@@ -43,7 +45,7 @@ public class UserService {
                 .findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("User %s not found", username)));
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new InvalidPasswordException("Invalid password");
+            throw new AppException("Invalid password", INVALID_PASSWORD);
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);

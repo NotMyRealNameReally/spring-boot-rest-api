@@ -3,9 +3,7 @@ package com.example.backend.user;
 import java.util.Collections;
 import java.util.Optional;
 
-import com.example.backend.exception.user.InvalidPasswordException;
-import com.example.backend.exception.user.InvalidRegistrationTokenException;
-import com.example.backend.exception.user.UserAlreadyExistsException;
+import com.example.backend.exception.AppException;
 import com.example.backend.user.form.UserRegistrationForm;
 import com.example.backend.user.registrationtoken.RegistrationToken;
 import com.example.backend.user.registrationtoken.RegistrationTokenRepository;
@@ -19,8 +17,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static com.example.backend.exception.ExceptionConditions.INVALID_PASSWORD_EXCEPTION;
+import static com.example.backend.exception.ExceptionConditions.INVALID_REGISTRATION_TOKEN_EXCEPTION;
+import static com.example.backend.exception.ExceptionConditions.USER_ALREADY_EXISTS_EXCEPTION;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -68,7 +69,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void should_Not_Register_User_And_Throw_InvalidRegistrationTokenException_When_Token_Invalid() {
+    void should_Not_Register_User_And_Throw_InvalidRegistrationToken_When_Token_Invalid() {
         UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com",
                 "password", "token");
         ApplicationUser user = new ApplicationUser("user", "password", "user@test.com",
@@ -80,14 +81,15 @@ public class UserServiceTests {
         given(userRepository.findByEmail(form.getEmail()))
                 .willReturn(Optional.of(user));
 
-        assertThatThrownBy(() -> underTest.registerUser(form))
-                .isInstanceOf(InvalidRegistrationTokenException.class);
+        assertThatExceptionOfType(AppException.class)
+                .isThrownBy(() -> underTest.registerUser(form))
+                .is(INVALID_REGISTRATION_TOKEN_EXCEPTION);
 
         then(userRepository).shouldHaveNoInteractions();
     }
 
     @Test
-    void should_Not_Register_User_And_Throw_UserAlreadyExistsException_When_Username_Taken() {
+    void should_Not_Register_User_And_Throw_UserAlreadyExists_When_Username_Taken() {
         UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com",
                 "password", "token");
         ApplicationUser user = new ApplicationUser("user", "password", "user@test.com",
@@ -99,14 +101,15 @@ public class UserServiceTests {
         given(userRepository.findByEmail(form.getEmail()))
                 .willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> underTest.registerUser(form))
-                .isInstanceOf(UserAlreadyExistsException.class);
+        assertThatExceptionOfType(AppException.class)
+                .isThrownBy(() -> underTest.registerUser(form))
+                .is(USER_ALREADY_EXISTS_EXCEPTION);
 
         then(userRepository).should(never()).save(any(ApplicationUser.class));
     }
 
     @Test
-    void should_Not_Register_User_And_Throw_UserAlreadyExistsException_When_Email_Taken() {
+    void should_Not_Register_User_And_Throw_UserAlreadyExists_When_Email_Taken() {
         UserRegistrationForm form = new UserRegistrationForm("user", "user@test.com",
                 "password", "token");
         ApplicationUser user = new ApplicationUser("user", "password", "user@test.com",
@@ -118,8 +121,9 @@ public class UserServiceTests {
         given(userRepository.findByEmail(form.getEmail()))
                 .willReturn(Optional.of(user));
 
-        assertThatThrownBy(() -> underTest.registerUser(form))
-                .isInstanceOf(UserAlreadyExistsException.class);
+        assertThatExceptionOfType(AppException.class)
+                .isThrownBy(() -> underTest.registerUser(form))
+                .is(USER_ALREADY_EXISTS_EXCEPTION);
 
         then(userRepository).should(never()).save(any(ApplicationUser.class));
     }
@@ -143,7 +147,7 @@ public class UserServiceTests {
     }
 
     @Test
-    void should_Throw_InvalidPasswordException_When_OldPassword_Invalid() {
+    void should_Throw_InvalidPassword_When_OldPassword_Invalid() {
         String oldPassword = "wrongPassword";
         String newPassword = "newPassword";
         String username = "user";
@@ -152,21 +156,22 @@ public class UserServiceTests {
         given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
         given(passwordEncoder.matches(oldPassword, user.getPassword())).willReturn(false);
 
-        assertThatThrownBy(() -> underTest.changeUserPassword(username, oldPassword, newPassword))
-                .isInstanceOf(InvalidPasswordException.class);
+        assertThatExceptionOfType(AppException.class)
+                .isThrownBy(() -> underTest.changeUserPassword(username, oldPassword, newPassword))
+                .is(INVALID_PASSWORD_EXCEPTION);
 
         then(userRepository).should(never()).save(any(ApplicationUser.class));
     }
 
     @Test
-    void should_Throw_UsernameNotFoundException_When_User_Not_Found() {
+    void should_Throw_UsernameNotFound_When_User_Not_Found() {
         String oldPassword = "oldPassword";
         String newPassword = "newPassword";
         String username = "user";
         given(userRepository.findByUsername(username)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> underTest.changeUserPassword(username, oldPassword, newPassword))
-                .isInstanceOf(UsernameNotFoundException.class);
+        assertThatExceptionOfType(UsernameNotFoundException.class)
+                .isThrownBy(() -> underTest.changeUserPassword(username, oldPassword, newPassword));
 
         then(userRepository).should(never()).save(any(ApplicationUser.class));
     }
